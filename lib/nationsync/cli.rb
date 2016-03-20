@@ -57,14 +57,19 @@ class NationSyncThor < Thor
     puts "Now run \"nationsync pick_theme\" to pick the theme you want to sync"
   end
 
-  desc "watch", "Watch current directory for changes"
-  def watch
+  desc "watch [DIR]", "Watch specified directory (or current directory) for changes"
+  def watch(dir=nil)
     setup_config
     setup_api
     unless @config["asset_keys"]
       puts "Please run `nationsync fetch` to get an up-to-date asset list."
       return
     end
+    unless dir and Dir.exist? dir
+      puts "Specified directory does not exists."
+      return
+    end
+    Dir.chdir(dir)
     listener = Listen.to(Dir.getwd) do |modified, added, removed|
       modified.each do |path|
         fn = File.basename(path)
